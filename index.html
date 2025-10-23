@@ -1,309 +1,195 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Controle de Vencimento – P&B Casa de Rações</title>
-  <style>
-    :root {
-      --cor-principal: #ff7f00;
-      --cor-secundaria: #ffffff;
-      --cor-texto: #333;
-    }
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Fornecedor - LevelUp Store</title>
+<style>
     body {
-      font-family: Arial, sans-serif;
-      background: var(--cor-secundaria);
-      color: var(--cor-texto);
-      padding: 20px;
-      margin: 0;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #f0f0f5;
     }
 
-    h1 {
-      text-align: center;
-      color: var(--cor-principal);
-      margin-bottom: 5px;
+    /* Tela de código */
+    #login {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #f0f0f5;
     }
 
-    .logo {
-      text-align: center;
-      margin-bottom: 5px;
+    #login-box {
+        background: #fff;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        text-align: center;
+        width: 300px;
     }
 
-    .logo img {
-      width: 70px;
+    #login-box input {
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 16px;
     }
 
-    .form-container {
-      background: #fff4e6;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      max-width: 800px;
-      margin: auto;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+    #login-box button {
+        padding: 12px 20px;
+        width: 100%;
+        border: none;
+        background: #28a745;
+        color: white;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
     }
 
-    input, button {
-      padding: 10px;
-      margin: 5px;
-      border-radius: 5px;
-      border: 1px solid #ddd;
-      font-size: 14px;
+    #login-box button:hover {
+        background: #218838;
     }
 
-    button {
-      background: var(--cor-principal);
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      transition: 0.2s;
+    #login-box .error {
+        color: red;
+        margin-top: 10px;
     }
 
-    button:hover {
-      background: #e67300;
+    /* Painel de produtos */
+    #panel {
+        display: none;
+        padding: 20px;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      margin-top: 20px;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    h2 {
+        text-align: center;
     }
 
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
-      text-align: center;
+    .products {
+        display: grid;
+        grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+        gap: 20px;
+        margin-top: 20px;
     }
 
-    th {
-      background-color: var(--cor-principal);
-      color: white;
+    .product-card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        padding: 15px;
+        text-align: center;
     }
 
-    tr:hover {
-      background-color: #fff8f0;
+    .product-card img {
+        width: 100%;
+        border-radius: 5px;
+        height: 150px;
+        object-fit: cover;
     }
 
-    .status-ok { color: green; font-weight: bold; }
-    .status-warning { color: orange; font-weight: bold; }
-    .status-expired { color: red; font-weight: bold; }
-
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      justify-content: center;
-      align-items: center;
+    .product-card h3 {
+        margin: 10px 0 5px;
     }
 
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      width: 300px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-      text-align: center;
-      animation: fadeIn 0.3s ease;
+    .product-card p {
+        margin: 5px 0;
     }
 
-    .modal-content input {
-      width: 90%;
-      margin: 8px 0;
+    .product-card button {
+        padding: 10px 15px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
     }
 
-    .modal-buttons {
-      margin-top: 10px;
-      display: flex;
-      justify-content: space-between;
+    .product-card button:hover {
+        background: #0056b3;
     }
-
-    .cancel-btn {
-      background: #999;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
-    }
-  </style>
+</style>
 </head>
 <body>
 
-  <div class="logo">
-    <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Logo da loja">
-  </div>
-  <h1>Controle de Vencimento – P&B Casa de Rações</h1>
-
-  <div class="form-container">
-    <input type="text" id="nome" placeholder="Nome da Ração" />
-    <input type="number" id="quantidade" placeholder="Quantidade" />
-    <input type="date" id="validade" />
-    <button id="btnAdd">📤 Adicionar</button>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Produto</th>
-        <th>Quantidade</th>
-        <th>Validade</th>
-        <th>Faltam</th>
-        <th>Status</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody id="tabela-corpo"></tbody>
-  </table>
-
-  <audio id="alert-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
-
-  <!-- Modal de edição -->
-  <div id="editModal" class="modal">
-    <div class="modal-content">
-      <h3>Editar Produto</h3>
-      <input type="text" id="editNome" placeholder="Nome da Ração" />
-      <input type="number" id="editQuantidade" placeholder="Quantidade" />
-      <input type="date" id="editValidade" />
-      <div class="modal-buttons">
-        <button id="btnSalvarEdicao">💾 Salvar</button>
-        <button class="cancel-btn" onclick="fecharModal()">❌ Cancelar</button>
-      </div>
+<!-- Tela de login por código -->
+<div id="login">
+    <div id="login-box">
+        <h2>Entrar como Fornecedor</h2>
+        <input type="text" id="codigo" placeholder="Digite seu código">
+        <button onclick="entrar()">Entrar</button>
+        <p class="error" id="error"></p>
     </div>
-  </div>
+</div>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
+<!-- Painel de produtos -->
+<div id="panel">
+    <h2>Bem-vindo, Fornecedor!</h2>
+    <div class="products" id="products">
+        <!-- Produtos serão inseridos via JS -->
+    </div>
+</div>
 
-  <script>
-    // Configuração do Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyAYtgo9aZ8TF2rsF1Xp-z9_0CvdeRLEhQQ",
-      authDomain: "peb-casa-de-racaoes.firebaseapp.com",
-      projectId: "peb-casa-de-racaoes",
-      storageBucket: "peb-casa-de-racaoes.appspot.com",
-      messagingSenderId: "998593310608",
-      appId: "1:998593310608:web:40997335ddc0a22700cd15",
-      measurementId: "G-VNF6QMKZSE"
-    };
+<script>
+    // Lista de códigos liberados
+    const codigosLiberados = ["FORNECEDOR123","VIP2025","LEVELUP","CODIGOEXTRA"];
 
-    // Inicializar Firebase
-    firebase.initializeApp(firebaseConfig);
-    firebase.analytics();
-    const db = firebase.firestore();
+    // Lista de produtos
+    const produtos = [
+        {nome:"Conta Fake 20k Avacoins", preco:"R$3,99", imagem:"https://via.placeholder.com/200x150?text=20k+Avacoins"},
+        {nome:"Conta Fake 25k Avacoins", preco:"R$4,99", imagem:"https://via.placeholder.com/200x150?text=25k+Avacoins"},
+        {nome:"Pacote de 1500 Seguidores", preco:"R$26,50", imagem:"https://via.placeholder.com/200x150?text=1500+Seguidores"},
+        {nome:"Pacote de 3000 Seguidores", preco:"R$49,99", imagem:"https://via.placeholder.com/200x150?text=3000+Seguidores"}
+    ];
 
-    let editandoId = null;
+    const suporteWhats = "+556296094975"; // Seu WhatsApp
 
-    function calcularDias(validade) {
-      const hoje = new Date();
-      const dataValidade = new Date(validade);
-      return Math.ceil((dataValidade - hoje) / (1000 * 60 * 60 * 24));
+    function entrar(){
+        const codigo = document.getElementById("codigo").value.trim();
+        const error = document.getElementById("error");
+
+        if(!codigo){
+            error.textContent = "Digite um código!";
+            return;
+        }
+
+        if(!codigosLiberados.includes(codigo)){
+            error.textContent = "Código não liberado!";
+            return;
+        }
+
+        // Código válido, mostrar painel
+        document.getElementById("login").style.display = "none";
+        document.getElementById("panel").style.display = "block";
+        carregarProdutos();
     }
 
-    // Atualiza tabela automaticamente ao mudar dados no Firestore
-    function atualizarTabela() {
-      const corpo = document.getElementById("tabela-corpo");
-      db.collection("racoes").onSnapshot(snapshot => {
-        corpo.innerHTML = "";
-        snapshot.forEach(doc => {
-          const item = doc.data();
-          const id = doc.id;
-          const dias = calcularDias(item.validade);
-          let status = "Ok";
-          let classe = "status-ok";
+    function carregarProdutos(){
+        const container = document.getElementById("products");
+        container.innerHTML = "";
 
-          if (dias < 0) {
-            status = "VENCIDO";
-            classe = "status-expired";
-          } else if (dias <= 45) {
-            status = `Vencendo em ${dias} dias`;
-            classe = "status-warning";
-          }
+        produtos.forEach(prod => {
+            const card = document.createElement("div");
+            card.className = "product-card";
 
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${item.nome}</td>
-            <td>${item.quantidade}</td>
-            <td>${item.validade}</td>
-            <td>${dias}</td>
-            <td class="${classe}">${status}</td>
-            <td>
-              <button onclick="abrirModal('${id}','${item.nome}','${item.quantidade}','${item.validade}')" style="background:#4CAF50;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">✏️</button>
-              <button onclick="removerRacao('${id}')" style="background:#ff4d4d;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">❌</button>
-            </td>
-          `;
-          corpo.appendChild(tr);
+            card.innerHTML = `
+                <img src="${prod.imagem}" alt="${prod.nome}">
+                <h3>${prod.nome}</h3>
+                <p>${prod.preco}</p>
+                <button onclick="pegarProduto('${prod.nome}','${prod.preco}')">Pegar Produto</button>
+            `;
+
+            container.appendChild(card);
         });
-      });
     }
 
-    async function adicionarRacao() {
-      const nome = document.getElementById("nome").value.trim();
-      const quantidade = document.getElementById("quantidade").value;
-      const validade = document.getElementById("validade").value;
-
-      if (!nome || !quantidade || !validade) {
-        alert("Preencha todos os campos!");
-        return;
-      }
-
-      await db.collection("racoes").add({ nome, quantidade, validade });
-
-      document.getElementById("nome").value = "";
-      document.getElementById("quantidade").value = "";
-      document.getElementById("validade").value = "";
+    function pegarProduto(nome, preco){
+        const mensagem = `Olá! Gostaria de pegar o produto:\nProduto: ${nome}\nPreço: ${preco}`;
+        const link = `https://api.whatsapp.com/send?phone=${suporteWhats}&text=${encodeURIComponent(mensagem)}`;
+        window.open(link, "_blank");
     }
-
-    function abrirModal(id, nome, quantidade, validade) {
-      editandoId = id;
-      document.getElementById("editNome").value = nome;
-      document.getElementById("editQuantidade").value = quantidade;
-      document.getElementById("editValidade").value = validade;
-      document.getElementById("editModal").style.display = "flex";
-    }
-
-    function fecharModal() {
-      editandoId = null;
-      document.getElementById("editModal").style.display = "none";
-    }
-
-    async function salvarEdicao() {
-      const nome = document.getElementById("editNome").value.trim();
-      const quantidade = document.getElementById("editQuantidade").value;
-      const validade = document.getElementById("editValidade").value;
-
-      if (!nome || !quantidade || !validade) {
-        alert("Preencha todos os campos!");
-        return;
-      }
-
-      await db.collection("racoes").doc(editandoId).set({ nome, quantidade, validade });
-      fecharModal();
-    }
-
-    async function removerRacao(id) {
-      await db.collection("racoes").doc(id).delete();
-    }
-
-    // Eventos
-    document.getElementById("btnAdd").addEventListener("click", adicionarRacao);
-    document.getElementById("btnSalvarEdicao").addEventListener("click", salvarEdicao);
-
-    // Carrega tabela ao iniciar
-    atualizarTabela();
-  </script>
+</script>
 </body>
 </html>
