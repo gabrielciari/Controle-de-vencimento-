@@ -1,309 +1,118 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Controle de Vencimento – P&B Casa de Rações</title>
-  <style>
-    :root {
-      --cor-principal: #ff7f00;
-      --cor-secundaria: #ffffff;
-      --cor-texto: #333;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Avisos - Loja</title>
+    <style>
+        :root { --primary: #25d366; --dark: #128c7e; --bg: #e5ddd5; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #075e54; text-align: center; margin-bottom: 25px; }
+        
+        .form-group { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; margin-bottom: 30px; }
+        input { padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+        input:focus { border-color: var(--dark); outline: none; }
+        
+        button.btn-save { background: var(--dark); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; padding: 0 20px; }
+        button.btn-save:hover { background: #0b6e62; }
 
-    body {
-      font-family: Arial, sans-serif;
-      background: var(--cor-secundaria);
-      color: var(--cor-texto);
-      padding: 20px;
-      margin: 0;
-    }
-
-    h1 {
-      text-align: center;
-      color: var(--cor-principal);
-      margin-bottom: 5px;
-    }
-
-    .logo {
-      text-align: center;
-      margin-bottom: 5px;
-    }
-
-    .logo img {
-      width: 70px;
-    }
-
-    .form-container {
-      background: #fff4e6;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      max-width: 800px;
-      margin: auto;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    input, button {
-      padding: 10px;
-      margin: 5px;
-      border-radius: 5px;
-      border: 1px solid #ddd;
-      font-size: 14px;
-    }
-
-    button {
-      background: var(--cor-principal);
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      transition: 0.2s;
-    }
-
-    button:hover {
-      background: #e67300;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      margin-top: 20px;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
-      text-align: center;
-    }
-
-    th {
-      background-color: var(--cor-principal);
-      color: white;
-    }
-
-    tr:hover {
-      background-color: #fff8f0;
-    }
-
-    .status-ok { color: green; font-weight: bold; }
-    .status-warning { color: orange; font-weight: bold; }
-    .status-expired { color: red; font-weight: bold; }
-
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      width: 300px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-      text-align: center;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .modal-content input {
-      width: 90%;
-      margin: 8px 0;
-    }
-
-    .modal-buttons {
-      margin-top: 10px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .cancel-btn {
-      background: #999;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
-    }
-  </style>
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th { background: #f0f2f5; color: #54656f; padding: 15px; text-align: left; border-bottom: 2px solid #ddd; }
+        td { padding: 15px; border-bottom: 1px solid #eee; vertical-align: middle; }
+        
+        .btn-whatsapp { background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-whatsapp:hover { background: #1da851; }
+        
+        .btn-delete { background: #ff4b2b; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; margin-left: 5px; }
+        
+        @media (max-width: 600px) { .form-group { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
 
-  <div class="logo">
-    <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Logo da loja">
-  </div>
-  <h1>Controle de Vencimento – P&B Casa de Rações</h1>
-
-  <div class="form-container">
-    <input type="text" id="nome" placeholder="Nome da Ração" />
-    <input type="number" id="quantidade" placeholder="Quantidade" />
-    <input type="date" id="validade" />
-    <button id="btnAdd">📤 Adicionar</button>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Produto</th>
-        <th>Quantidade</th>
-        <th>Validade</th>
-        <th>Faltam</th>
-        <th>Status</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody id="tabela-corpo"></tbody>
-  </table>
-
-  <audio id="alert-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
-
-  <!-- Modal de edição -->
-  <div id="editModal" class="modal">
-    <div class="modal-content">
-      <h3>Editar Produto</h3>
-      <input type="text" id="editNome" placeholder="Nome da Ração" />
-      <input type="number" id="editQuantidade" placeholder="Quantidade" />
-      <input type="date" id="editValidade" />
-      <div class="modal-buttons">
-        <button id="btnSalvarEdicao">💾 Salvar</button>
-        <button class="cancel-btn" onclick="fecharModal()">❌ Cancelar</button>
-      </div>
+<div class="container">
+    <h2>📦 Gestão de Chegada de Mercadoria</h2>
+    
+    <div class="form-group">
+        <input type="text" id="nome" placeholder="Nome do Cliente">
+        <input type="text" id="telefone" placeholder="DDD + Número (Só números)">
+        <input type="text" id="pedido" placeholder="O que ele encomendou?">
+        <button class="btn-save" onclick="adicionarCliente()">Salvar Cliente</button>
     </div>
-  </div>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
+    <table id="tabelaClientes">
+        <thead>
+            <tr>
+                <th>Cliente</th>
+                <th>O que precisa</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
+</div>
 
-  <script>
-    // Configuração do Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyAYtgo9aZ8TF2rsF1Xp-z9_0CvdeRLEhQQ",
-      authDomain: "peb-casa-de-racaoes.firebaseapp.com",
-      projectId: "peb-casa-de-racaoes",
-      storageBucket: "peb-casa-de-racaoes.appspot.com",
-      messagingSenderId: "998593310608",
-      appId: "1:998593310608:web:40997335ddc0a22700cd15",
-      measurementId: "G-VNF6QMKZSE"
-    };
+<script>
+    document.addEventListener('DOMContentLoaded', mostrarClientes);
 
-    // Inicializar Firebase
-    firebase.initializeApp(firebaseConfig);
-    firebase.analytics();
-    const db = firebase.firestore();
+    function adicionarCliente() {
+        const nome = document.getElementById('nome').value;
+        const telefone = document.getElementById('telefone').value.replace(/\D/g,'');
+        const pedido = document.getElementById('pedido').value;
 
-    let editandoId = null;
+        if (!nome || !telefone || !pedido) {
+            alert("Por favor, preencha todos os campos!");
+            return;
+        }
 
-    function calcularDias(validade) {
-      const hoje = new Date();
-      const dataValidade = new Date(validade);
-      return Math.ceil((dataValidade - hoje) / (1000 * 60 * 60 * 24));
+        const cliente = { nome, telefone, pedido, id: Date.now() };
+        let clientes = JSON.parse(localStorage.getItem('clientes_loja') || '[]');
+        clientes.push(cliente);
+        localStorage.setItem('clientes_loja', JSON.stringify(clientes));
+
+        // Limpa os campos
+        document.getElementById('nome').value = '';
+        document.getElementById('telefone').value = '';
+        document.getElementById('pedido').value = '';
+
+        mostrarClientes();
     }
 
-    // Atualiza tabela automaticamente ao mudar dados no Firestore
-    function atualizarTabela() {
-      const corpo = document.getElementById("tabela-corpo");
-      db.collection("racoes").onSnapshot(snapshot => {
-        corpo.innerHTML = "";
-        snapshot.forEach(doc => {
-          const item = doc.data();
-          const id = doc.id;
-          const dias = calcularDias(item.validade);
-          let status = "Ok";
-          let classe = "status-ok";
+    function mostrarClientes() {
+        const corpoTabela = document.querySelector('#tabelaClientes tbody');
+        corpoTabela.innerHTML = '';
+        const clientes = JSON.parse(localStorage.getItem('clientes_loja') || '[]');
 
-          if (dias < 0) {
-            status = "VENCIDO";
-            classe = "status-expired";
-          } else if (dias <= 45) {
-            status = `Vencendo em ${dias} dias`;
-            classe = "status-warning";
-          }
+        clientes.forEach(cliente => {
+            // Criando a mensagem personalizada
+            const mensagem = `Olá ${cliente.nome}, tudo bem? Estou passando para avisar que o item que você procurava (${cliente.pedido}) acabou de chegar aqui na loja! 🥳`;
+            const linkWhatsapp = `https://wa.me/55${cliente.telefone}?text=${encodeURIComponent(mensagem)}`;
 
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${item.nome}</td>
-            <td>${item.quantidade}</td>
-            <td>${item.validade}</td>
-            <td>${dias}</td>
-            <td class="${classe}">${status}</td>
-            <td>
-              <button onclick="abrirModal('${id}','${item.nome}','${item.quantidade}','${item.validade}')" style="background:#4CAF50;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">✏️</button>
-              <button onclick="removerRacao('${id}')" style="background:#ff4d4d;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">❌</button>
-            </td>
-          `;
-          corpo.appendChild(tr);
+            const row = corpoTabela.insertRow();
+            row.innerHTML = `
+                <td><strong>${cliente.nome}</strong><br><small>${cliente.telefone}</small></td>
+                <td>${cliente.pedido}</td>
+                <td>
+                    <a href="${linkWhatsapp}" target="_blank" class="btn-whatsapp">
+                        Avisar Chegada
+                    </a>
+                    <button class="btn-delete" onclick="removerCliente(${cliente.id})">🗑️</button>
+                </td>
+            `;
         });
-      });
     }
 
-    async function adicionarRacao() {
-      const nome = document.getElementById("nome").value.trim();
-      const quantidade = document.getElementById("quantidade").value;
-      const validade = document.getElementById("validade").value;
-
-      if (!nome || !quantidade || !validade) {
-        alert("Preencha todos os campos!");
-        return;
-      }
-
-      await db.collection("racoes").add({ nome, quantidade, validade });
-
-      document.getElementById("nome").value = "";
-      document.getElementById("quantidade").value = "";
-      document.getElementById("validade").value = "";
+    function removerCliente(id) {
+        if(confirm("Deseja remover este cliente da lista?")) {
+            let clientes = JSON.parse(localStorage.getItem('clientes_loja') || '[]');
+            clientes = clientes.filter(c => c.id !== id);
+            localStorage.setItem('clientes_loja', JSON.stringify(clientes));
+            mostrarClientes();
+        }
     }
+</script>
 
-    function abrirModal(id, nome, quantidade, validade) {
-      editandoId = id;
-      document.getElementById("editNome").value = nome;
-      document.getElementById("editQuantidade").value = quantidade;
-      document.getElementById("editValidade").value = validade;
-      document.getElementById("editModal").style.display = "flex";
-    }
-
-    function fecharModal() {
-      editandoId = null;
-      document.getElementById("editModal").style.display = "none";
-    }
-
-    async function salvarEdicao() {
-      const nome = document.getElementById("editNome").value.trim();
-      const quantidade = document.getElementById("editQuantidade").value;
-      const validade = document.getElementById("editValidade").value;
-
-      if (!nome || !quantidade || !validade) {
-        alert("Preencha todos os campos!");
-        return;
-      }
-
-      await db.collection("racoes").doc(editandoId).set({ nome, quantidade, validade });
-      fecharModal();
-    }
-
-    async function removerRacao(id) {
-      await db.collection("racoes").doc(id).delete();
-    }
-
-    // Eventos
-    document.getElementById("btnAdd").addEventListener("click", adicionarRacao);
-    document.getElementById("btnSalvarEdicao").addEventListener("click", salvarEdicao);
-
-    // Carrega tabela ao iniciar
-    atualizarTabela();
-  </script>
 </body>
 </html>
