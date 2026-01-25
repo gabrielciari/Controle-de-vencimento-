@@ -166,7 +166,7 @@
         let pendentes = JSON.parse(localStorage.getItem('loja_p') || '[]');
         const c = pendentes.find(i => i.id === id);
         
-        const texto = `Olá ${c.nome}, aqui e da P&B casa de raçoes seu pedido (${c.prod}) chegou! 🥳`;
+        const texto = `Olá ${c.nome}, aqui é da P&B Casa de Rações, passando para avisar que já temos (${c.prod}) disponível e podemos separar para você. Fico no aguardo 😊🐶🐱! 🥳`;
         window.open(`https://wa.me/55${c.tel}?text=${encodeURIComponent(texto)}`, '_blank');
 
         // Move para histórico
