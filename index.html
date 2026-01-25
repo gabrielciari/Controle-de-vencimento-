@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestão P&B casa de raçoes  - Loja</title>
+    <title>Sistema de Gestão P&B Casa de Rações</title>
     <style>
         :root { --laranja: #ff6600; --laranja-escuro: #e65c00; --branco: #ffffff; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
         .container { max-width: 1000px; margin: auto; background: var(--branco); padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 8px solid var(--laranja); }
         
-        h2, h3 { color: var(--laranja); margin-top: 0; }
+        h2, h3 { color: var(--laranja); margin-top: 0; display: flex; align-items: center; gap: 10px; }
         .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
-        /* Formulário */
         .form-group { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 10px; margin-bottom: 25px; }
         input, select { padding: 12px; border: 2px solid #eee; border-radius: 8px; outline: none; }
         input:focus { border-color: var(--laranja); }
@@ -22,11 +21,9 @@
         .btn-save:hover { background: var(--laranja-escuro); }
         .btn-export { background: #333; color: white; padding: 8px 15px; font-size: 12px; }
 
-        /* Filtros e Busca */
         .search-box { margin-bottom: 20px; display: flex; gap: 10px; }
         .search-box input { flex: 1; }
 
-        /* Tabelas */
         .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
         .tab-btn { padding: 10px 20px; background: #eee; border-radius: 8px 8px 0 0; }
         .tab-btn.active { background: var(--laranja); color: white; }
@@ -39,10 +36,10 @@
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
         .btn-wa { background: #25d366; color: white; padding: 7px 12px; text-decoration: none; font-size: 12px; display: inline-block; border-radius: 5px; }
-        .btn-del { color: #ccc; font-size: 18px; background: none; margin-left: 10px; }
-        .btn-del:hover { color: #ff4d4d; }
+        /* Botão excluir corrigido */
+        .btn-del { background: #ff4d4d; color: white; padding: 7px 10px; font-size: 11px; margin-left: 5px; border-radius: 5px; }
+        .btn-del:hover { background: #cc0000; }
 
-        /* Modal */
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 30px; border-radius: 12px; text-align: center; max-width: 350px; }
     </style>
@@ -51,7 +48,7 @@
 
 <div class="container">
     <div class="header-actions">
-        <h2>🧡 espera por produto</h2>
+        <h2>🔔 espera por produto</h2>
         <button class="btn-export" onclick="exportarCSV()">📥 Exportar Backup (Excel)</button>
     </div>
     
@@ -79,7 +76,7 @@
 
     <div class="tabs">
         <button id="tabP" class="tab-btn active" onclick="mudarAba('P')">Pendentes</button>
-        <button id="tabH" class="tab-btn" onclick="mudarAba('H')">Histórico (Avisados)</button>
+        <button id="tabH" class="tab-btn" onclick="mudarAba('H')">Histórico (15 dias)</button>
     </div>
 
     <div id="listaPendentes">
@@ -116,7 +113,24 @@
 <script>
     let abaAtual = 'P';
 
-    document.addEventListener('DOMContentLoaded', carregar);
+    document.addEventListener('DOMContentLoaded', () => {
+        limparHistoricoAntigo();
+        carregar();
+    });
+
+    function limparHistoricoAntigo() {
+        let historico = JSON.parse(localStorage.getItem('loja_h') || '[]');
+        const hoje = new Date().getTime();
+        const quinzeDiasEmMs = 15 * 24 * 60 * 60 * 1000;
+
+        // Filtra apenas o que tem menos de 15 dias
+        const historicoNovo = historico.filter(c => {
+            const dataAvisoMs = new Date(c.timestampAviso).getTime();
+            return (hoje - dataAvisoMs) < quinzeDiasEmMs;
+        });
+
+        localStorage.setItem('loja_h', JSON.stringify(historicoNovo));
+    }
 
     function adicionar() {
         const nome = document.getElementById('nome').value;
@@ -155,7 +169,7 @@
                 <td class="${classeUrgente}">${dias} dias</td>
                 <td>
                     <button class="btn-wa" onclick="avisar(${c.id})">Avisar</button>
-                    <button class="btn-del" onclick="remover(${c.id}, 'P')">🗑️</button>
+                    <button class="btn-del" onclick="remover(${c.id}, 'P')">Excluir</button>
                 </td>
             `;
         });
@@ -173,16 +187,19 @@
         const texto = `Olá ${c.nome}, aqui é da P&B Casa de Rações, passando para avisar que já temos (${c.prod}) disponível e podemos separar para você. Fico no aguardo 😊🐶🐱! 🥳`;
         window.open(`https://wa.me/55${c.tel}?text=${encodeURIComponent(texto)}`, '_blank');
 
-        // Move para histórico
         let historico = JSON.parse(localStorage.getItem('loja_h') || '[]');
-        historico.unshift({...c, dataAviso: new Date().toLocaleDateString()});
-        localStorage.setItem('loja_h', JSON.stringify(historico.slice(0, 50))); // Guarda últimos 50
+        historico.unshift({
+            ...c, 
+            dataAviso: new Date().toLocaleDateString(),
+            timestampAviso: new Date().getTime() // Para o controle de 15 dias
+        });
+        localStorage.setItem('loja_h', JSON.stringify(historico));
 
         remover(id, 'P', false);
     }
 
     function remover(id, listaTipo, confirmar = true) {
-        if(confirmar && !confirm("Excluir registro?")) return;
+        if(confirmar && !confirm("Deseja excluir este registro permanentemente?")) return;
         let key = listaTipo === 'P' ? 'loja_p' : 'loja_h';
         let lista = JSON.parse(localStorage.getItem(key));
         localStorage.setItem(key, JSON.stringify(lista.filter(i => i.id !== id)));
@@ -212,7 +229,7 @@
             const dias = Math.floor((new Date().getTime() - c.data) / (1000 * 60 * 60 * 24));
             csv += `${c.nome};${c.tel};${c.prod};${c.cat};${dias}\n`;
         });
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.setAttribute("download", "backup_loja.csv");
