@@ -23,7 +23,7 @@
 
         .container {
             width: 100%;
-            max-width: 800px;
+            max-width: 850px;
             background: var(--branco);
             padding: 30px;
             border-radius: 15px;
@@ -33,7 +33,6 @@
 
         h2 { color: var(--laranja); text-align: center; margin-bottom: 25px; }
 
-        /* Formulário */
         .form-group {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr auto;
@@ -64,7 +63,6 @@
 
         button.btn-save:hover { background: var(--laranja-escuro); transform: translateY(-2px); }
 
-        /* Tabela */
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; padding: 15px; background: var(--cinza-claro); color: #555; }
         td { padding: 15px; border-bottom: 1px solid #eee; }
@@ -72,29 +70,36 @@
         .btn-whatsapp {
             background: #25d366;
             color: white;
-            padding: 8px 15px;
+            padding: 10px 18px;
             border-radius: 6px;
             text-decoration: none;
             font-weight: bold;
             font-size: 13px;
             display: inline-block;
+            border: none;
+            cursor: pointer;
         }
+
+        .btn-whatsapp:hover { background: #1da851; }
 
         .btn-delete {
             background: none;
             border: none;
-            color: #ff4d4d;
+            color: #ccc;
             cursor: pointer;
             font-size: 18px;
             margin-left: 10px;
+            transition: 0.3s;
         }
+        
+        .btn-delete:hover { color: #ff4d4d; }
 
-        /* Modal / Pop-up Estilizado */
+        /* Pop-up (Modal) */
         #modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -134,12 +139,12 @@
 <body>
 
 <div class="container">
-    <h2>🧡 Cadastro de Encomendas</h2>
+    <h2>🧡 Encomendas Pendentes</h2>
     
     <div class="form-group">
         <input type="text" id="nome" placeholder="Nome do Cliente">
         <input type="text" id="telefone" placeholder="DDD + Número">
-        <input type="text" id="pedido" placeholder="Produto">
+        <input type="text" id="pedido" placeholder="Produto esperado">
         <button class="btn-save" onclick="adicionarCliente()">Salvar</button>
     </div>
 
@@ -148,7 +153,7 @@
             <tr>
                 <th>Cliente</th>
                 <th>Produto</th>
-                <th>Ações</th>
+                <th>Ação</th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -157,9 +162,9 @@
 
 <div id="modal">
     <div class="modal-content">
-        <h3 id="modalTitulo">Sucesso!</h3>
-        <p id="modalMensagem">O cliente foi salvo corretamente.</p>
-        <button onclick="fecharModal()">Entendi</button>
+        <h3 id="modalTitulo">Aviso</h3>
+        <p id="modalMensagem"></p>
+        <button onclick="fecharModal()">OK</button>
     </div>
 </div>
 
@@ -182,48 +187,63 @@
         const pedido = document.getElementById('pedido').value;
 
         if (!nome || !telefone || !pedido) {
-            mostrarModal("Atenção!", "Preencha todos os campos antes de salvar.");
+            mostrarModal("Ops!", "Preencha todos os campos corretamente.");
             return;
         }
 
         const cliente = { nome, telefone, pedido, id: Date.now() };
-        let clientes = JSON.parse(localStorage.getItem('loja_laranja') || '[]');
+        let clientes = JSON.parse(localStorage.getItem('loja_v3') || '[]');
         clientes.push(cliente);
-        localStorage.setItem('loja_laranja', JSON.stringify(clientes));
+        localStorage.setItem('loja_v3', JSON.stringify(clientes));
 
         document.getElementById('nome').value = '';
         document.getElementById('telefone').value = '';
         document.getElementById('pedido').value = '';
 
         mostrarClientes();
-        mostrarModal("Pronto! ✅", `${nome} foi adicionado à lista.`);
+    }
+
+    function avisarERemover(id, nome, telefone, pedido) {
+        // 1. Criar a mensagem e abrir WhatsApp
+        const mensagem = `Olá ${nome}, tudo bem? O item que você procurava (${pedido}) acabou de chegar aqui na loja! 🥳`;
+        const linkWhatsapp = `https://wa.me/55${telefone}?text=${encodeURIComponent(mensagem)}`;
+        
+        window.open(linkWhatsapp, '_blank');
+
+        // 2. Remover o cliente da lista automaticamente
+        removerCliente(id, false); // false para não pedir confirmação ao avisar
     }
 
     function mostrarClientes() {
         const corpoTabela = document.querySelector('#tabelaClientes tbody');
         corpoTabela.innerHTML = '';
-        const clientes = JSON.parse(localStorage.getItem('loja_laranja') || '[]');
+        const clientes = JSON.parse(localStorage.getItem('loja_v3') || '[]');
+
+        if (clientes.length === 0) {
+            corpoTabela.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">Nenhum cliente na lista.</td></tr>';
+        }
 
         clientes.forEach(cliente => {
-            const mensagem = `Olá ${cliente.nome}, tudo bem? O item que você procurava (${cliente.pedido}) acabou de chegar aqui na loja! 🥳`;
-            const linkWhatsapp = `https://wa.me/55${cliente.telefone}?text=${encodeURIComponent(mensagem)}`;
-
             const row = corpoTabela.insertRow();
             row.innerHTML = `
                 <td><strong>${cliente.nome}</strong><br><small>${cliente.telefone}</small></td>
                 <td>${cliente.pedido}</td>
                 <td>
-                    <a href="${linkWhatsapp}" target="_blank" class="btn-whatsapp">Avisar</a>
-                    <button class="btn-delete" onclick="removerCliente(${cliente.id})">🗑️</button>
+                    <button class="btn-whatsapp" onclick="avisarERemover(${cliente.id}, '${cliente.nome}', '${cliente.telefone}', '${cliente.pedido}')">
+                        Avisar e Retirar
+                    </button>
+                    <button class="btn-delete" onclick="removerCliente(${cliente.id}, true)">🗑️</button>
                 </td>
             `;
         });
     }
 
-    function removerCliente(id) {
-        let clientes = JSON.parse(localStorage.getItem('loja_laranja') || '[]');
+    function removerCliente(id, confirmar) {
+        if (confirmar && !confirm("Deseja excluir este registro sem avisar?")) return;
+
+        let clientes = JSON.parse(localStorage.getItem('loja_v3') || '[]');
         clientes = clientes.filter(c => c.id !== id);
-        localStorage.setItem('loja_laranja', JSON.stringify(clientes));
+        localStorage.setItem('loja_v3', JSON.stringify(clientes));
         mostrarClientes();
     }
 </script>
